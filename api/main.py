@@ -12,8 +12,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from schemas import ClientData, PredictionResponse
-from model import predire
+from api.schemas import ClientData, PredictionResponse
+from api.model import predire
 
 # ── Création de l'application FastAPI ─────────────────────────────────────────
 app = FastAPI(
