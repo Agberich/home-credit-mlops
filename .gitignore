@@ -1,0 +1,9 @@
+data/raw/
+data/processed/
+models/
+mlruns/
+notebooks/mlflow.db
+__pycache__/
+*.pkl
+*.csv
+.ipynb_checkpoints/
