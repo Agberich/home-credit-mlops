@@ -1,0 +1,29 @@
+name: CI - Home Credit MLOps
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer le code
+        uses: actions/checkout@v3
+
+      - name: Installer Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Installer les dependances
+        run: |
+          pip install fastapi uvicorn pydantic xgboost scikit-learn joblib numpy pandas
+
+      - name: Verifier schemas
+        run: |
+          cd api
+          python -c "from schemas import ClientData, PredictionResponse; print('Schemas OK')"
