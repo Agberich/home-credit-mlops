@@ -78,6 +78,18 @@ if page == "🏦 Scoring Client":
         try:
             r = requests.post(API_URL, json=payload)
             if r.status_code == 200:
+                # --- SAUVEGARDE DES DONNÉES EN PRODUCTION ---
+nouvelle_entree = pd.DataFrame([{
+    'AMT_INCOME_TOTAL': revenu,
+    'AMT_CREDIT': credit,
+    'AGE_YEARS': age,
+    'EXT_SOURCE_MEAN': (ext1 + ext2 + ext3) / 3,
+    'ANNUITY_INCOME_RATIO': annuite / revenu if revenu > 0 else 0,
+    'CREDIT_INCOME_RATIO': credit / revenu if revenu > 0 else 0
+}])
+
+# Ajouter la ligne dans un fichier CSV local
+nouvelle_entree.to_csv("production_logs.csv", mode='a', header=not os.path.exists("production_logs.csv"), index=False)
                 resultat = r.json()
                 score    = resultat["score_defaut"]
                 decision = resultat["decision"]
@@ -132,15 +144,16 @@ else:
     })
 
     # Simuler données de production avec drift
-    np.random.seed(123)
-    production = pd.DataFrame({
-        'AMT_INCOME_TOTAL'   : np.random.lognormal(11.5, 0.8, n) * 1.20,
-        'AMT_CREDIT'         : np.random.lognormal(12.5, 0.7, n) * 1.30,
-        'AGE_YEARS'          : np.random.normal(46, 11, n),
-        'EXT_SOURCE_MEAN'    : np.random.beta(3, 4, n) * 0.85,
-        'ANNUITY_INCOME_RATIO': np.random.normal(0.17, 0.08, n),
-        'CREDIT_INCOME_RATIO': np.random.normal(3.5, 1.5, n)
-    })
+  # ----------------------------------------------------------------------
+# Données de production : Chargement des vRAIES requêtes utilisateurs
+# ----------------------------------------------------------------------
+if os.path.exists("production_logs.csv"):
+    production = pd.read_csv("production_logs.csv")
+    st.info(f"📊 Monitoring alimenté par **{len(production)}** analyse(s) client(s) réelle(s).")
+else:
+    # Option de secours si personne n'a encore utilisé l'application
+    st.warning("⚠️ Aucune donnée réelle enregistrée. Veuillez analyser au moins un dossier dans la page Scoring.")
+    production = reference.copy() # Évite de faire crasher l'application
 
     # Test KS pour chaque feature
     st.subheader("🔬 Résultats du Test de Kolmogorov-Smirnov")
